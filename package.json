@@ -1,0 +1,22 @@
+{
+    "name": "minesweeper-3d",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "deploy": "vercel --prod"
+    },
+    "devDependencies": {
+        "@types/three": "^0.179.0",
+        "typescript": "~5.8.3",
+        "vite": "^7.1.2"
+    },
+    "dependencies": {
+        "nanoevents": "^9.1.0",
+        "pixi.js": "^8.13.0",
+        "three": "^0.179.1"
+    }
+}
