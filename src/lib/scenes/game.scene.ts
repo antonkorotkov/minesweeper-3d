@@ -1,16 +1,19 @@
 'use strict';
 
-import { AxesHelper, GridHelper } from "three";
+import { AmbientLight, AxesHelper, DirectionalLight, GridHelper } from "three";
 import type { IScene } from "../core/interfaces/scene.interface";
 import type MainScene from "./main.scene";
-import { DEBUG_AXES_SIZE, DEBUG_GRID_COLOR1, DEBUG_GRID_COLOR2, DEBUG_GRID_DIVISIONS, DEBUG_GRID_SIZE } from "./const";
+import { DEBUG_AXES_SIZE, DEBUG_GRID_COLOR1, DEBUG_GRID_COLOR2, DEBUG_GRID_DIVISIONS, DEBUG_GRID_SIZE, INTRO_AMBIENT_LIGHT_COLOR, INTRO_DIRECTIONAL_LIGHT_COLOR, INTRO_DIRECTIONAL_LIGHT_INTENSITY } from "./const";
 import Scene from "../core/scene";
 import type DIFFICULTY from "../core/enums/difficulty";
 import FIELD_SIZE from "../core/enums/fieldSize";
 import MINES_COUNT from "../core/enums/minesCount";
+import MineFieldBlock from "../objects/mine-field-block";
 
 export default class GameScene extends Scene implements IScene {
     private mainScene: MainScene;
+    private ambientLight!: AmbientLight;
+    private dirLight!: DirectionalLight;
     private mineField!: number[][];
 
     /**
@@ -73,6 +76,16 @@ export default class GameScene extends Scene implements IScene {
     protected init(): void {
         this.mainScene.controls.enabled = true;
 
+        this.ambientLight = new AmbientLight(INTRO_AMBIENT_LIGHT_COLOR);
+        this.mainScene.scene.add(this.ambientLight);
+
+        this.dirLight = new DirectionalLight(
+            INTRO_DIRECTIONAL_LIGHT_COLOR,
+            INTRO_DIRECTIONAL_LIGHT_INTENSITY
+        );
+        this.dirLight.castShadow = true;
+        this.mainScene.scene.add(this.dirLight);
+
         super.init();
     }
 
@@ -80,6 +93,24 @@ export default class GameScene extends Scene implements IScene {
         console.log("Starting game with difficulty:", difficulty);
 
         this.generateMinefield(difficulty);
+        this.drawField();
+    }
+
+    private drawField(): void {
+        const size = this.mineField.length;
+        const spacing = 1.01;
+        const offset = (size - 1) * spacing / 2;
+
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                const value = this.mineField[r][c];
+
+                const block = new MineFieldBlock(r, c);
+                console.log("Adding block at:", r, c, "with value:", value, block);
+                block.setPosition(r * spacing - offset, 0.05, c * spacing - offset);
+                this.mainScene.scene.add(block);
+            }
+        }
     }
 
     /**

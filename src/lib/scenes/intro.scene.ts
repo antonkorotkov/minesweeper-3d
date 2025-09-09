@@ -11,7 +11,6 @@ import {
 import { Container as PixiContainer, Sprite } from "pixi.js";
 import type { IScene } from "../core/interfaces/scene.interface";
 import IntroMine from "../objects/intro-mine";
-import DefaultMaterial from "../objects/materials/default.material";
 import type MainScene from "./main.scene";
 import {
 	BUTTON_EASY_COLOR1,
@@ -80,7 +79,7 @@ export default class IntroScene extends Scene implements IScene {
 		this.mainScene.scene.background = new Color(0x001d2e);
 		this.mainScene.controls.enabled = false;
 		this.mainScene.loadingOverlay.hide();
-		this.mine = new IntroMine(DefaultMaterial.getInstance(0x111111).material);
+		this.mine = new IntroMine();
 		this.mainScene.scene.add(this.mine);
 
 		this.ambientLight = new AmbientLight(INTRO_AMBIENT_LIGHT_COLOR);
