@@ -1,4 +1,4 @@
-# SAPPER 3D
+# MINESWEEPER 3D
 
 A 3D game written on Three.js.
 
@@ -13,5 +13,5 @@ the number of mines around the cube.
 
 ## Technical Aspects
 
-- There is a possibility to choose 3 different field sizes before the game starts. Small: 7x7, medium: 14x14, large: 21x21.
+- There is a possibility to choose 3 different field sizes before the game starts. Small: 8x8, medium: 12x12, large: 16x16.
 - The game is in 3D space. Perspective Camera. Zoom-in and zoom-out.
