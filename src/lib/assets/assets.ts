@@ -8,10 +8,6 @@ export type ThreeAsset = AssetDefinition & { type: 'texture' };
 
 export const pixiAssets: Array<PixiAsset> = [
     {
-        alias: 'button',
-        src: 'assets/button.png'
-    },
-    {
         alias: 'logo',
         src: 'assets/logo.png'
     }

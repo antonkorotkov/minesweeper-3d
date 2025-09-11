@@ -37,7 +37,6 @@ export default class IntroScene extends Scene implements IScene {
 	private lightDistance = 10;
 	private damping = 0.05;
 	private lightTargetPos = new Vector3(0, 0, 50);
-	private mouse = { x: 0, y: 0 };
 	private difficultyButtonsContainer!: PixiContainer;
 	private difficultyButtons: Array<DifficultyButton> = [];
 	private mine!: IntroMine;
@@ -63,14 +62,6 @@ export default class IntroScene extends Scene implements IScene {
 	static getInstance(mainScene: MainScene): IntroScene {
 		return this.getSingleton<IntroScene>(mainScene);
 	}
-
-	/**
-	 * Handle mouse move events
-	 */
-	private mouseMoveHandler = (event: MouseEvent) => {
-		this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-		this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-	};
 
 	/**
 	 * Initialize the intro scene
@@ -100,7 +91,6 @@ export default class IntroScene extends Scene implements IScene {
 		this.createDifficultyButtons();
 		this.createLogo();
 
-		window.addEventListener("mousemove", this.mouseMoveHandler);
 		window.addEventListener("resize", this.layoutDifficultyButtonsBound);
 		window.addEventListener("resize", this.layoutLogoBound);
 
@@ -251,7 +241,8 @@ export default class IntroScene extends Scene implements IScene {
 	 * Update the scene each frame (called from the main animation loop)
 	 */
 	public tick(_delta: number): void {
-		this.mine.rotation.y += 0.005;
+		this.mine.rotation.y += 0.002;
+        this.mine.rotation.x += 0.002;
 		const targetPos = this.getLightTargetPosition();
 		this.lightTargetPos.lerp(targetPos, this.damping);
 		this.dirLight.position.copy(this.lightTargetPos);
@@ -264,10 +255,8 @@ export default class IntroScene extends Scene implements IScene {
 	 * Dispose of the intro scene and its resources
 	 */
 	public dispose(): void {
-		window.removeEventListener("mousemove", this.mouseMoveHandler);
 		window.removeEventListener("resize", this.layoutDifficultyButtonsBound);
-		if (this.layoutLogoBound)
-			window.removeEventListener("resize", this.layoutLogoBound);
+		window.removeEventListener("resize", this.layoutLogoBound);
 
 		if (this.dirLightHelper) {
 			this.mainScene.scene.remove(this.dirLightHelper);
@@ -284,21 +273,20 @@ export default class IntroScene extends Scene implements IScene {
 			this.ambientLight.dispose();
 		}
 
-		if (this.mine) this.mainScene.scene.remove(this.mine);
+		if (this.mine)
+            this.mainScene.scene.remove(this.mine);
 
 		if (this.logoContainer && this.mainScene.ui)
 			this.mainScene.ui.removeChild(this.logoContainer);
+
+        super.dispose();
 	}
 
 	/**
 	 * Initialize debug helpers (if in development mode)
 	 */
 	public initDebugHelpers(): void {
-		this.dirLightHelper = new DirectionalLightHelper(
-			this.dirLight,
-			2,
-			0xffaa00
-		);
+		this.dirLightHelper = new DirectionalLightHelper(this.dirLight);
 		this.mainScene.scene.add(this.dirLightHelper);
 	}
 }

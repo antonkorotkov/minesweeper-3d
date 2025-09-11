@@ -1,12 +1,20 @@
 'use strict';
 
+import { Vector2 } from "three";
 import type { IScene } from "./interfaces/scene.interface";
 import Singleton from "./singleton";
 
 export default abstract class Scene extends Singleton implements IScene {
+    protected mouse = new Vector2(0, 0);
+
     constructor() {
         super();
+
+        window.addEventListener("mousemove", this.mouseMoveHandler);
     }
+
+    abstract initDebugHelpers(): void;
+    abstract tick(delta: number): void;
 
     protected init(): void {
         const isDev =
@@ -14,9 +22,12 @@ export default abstract class Scene extends Singleton implements IScene {
         if (isDev) this.initDebugHelpers();
     }
 
-    abstract initDebugHelpers(): void;
+    protected mouseMoveHandler = (event: MouseEvent) => {
+		this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+		this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	};
 
-    abstract tick(delta: number): void;
-
-    abstract dispose(): void;
+    dispose(): void {
+        window.removeEventListener("mousemove", this.mouseMoveHandler);
+    }
 }

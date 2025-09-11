@@ -10,7 +10,7 @@ export const CAMERA_FAR = 150;
 
 export const INTRO_AMBIENT_LIGHT_COLOR = 0xffffff;
 export const INTRO_DIRECTIONAL_LIGHT_COLOR = 0xffffff;
-export const INTRO_DIRECTIONAL_LIGHT_INTENSITY = 10;
+export const INTRO_DIRECTIONAL_LIGHT_INTENSITY = 30;
 
 export const CONTROLS_ENABLE_DAMPING = true;
 export const CONTROLS_DAMPING_FACTOR = 0.1;

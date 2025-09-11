@@ -26,6 +26,9 @@ export default class GameScene extends Scene implements IScene {
         this.init();
     }
 
+    /**
+     * The singleton instance of the GameScene
+     */
     static getInstance(mainScene: MainScene): GameScene {
         return this.getSingleton<GameScene>(mainScene);
     }
@@ -128,5 +131,7 @@ export default class GameScene extends Scene implements IScene {
 
     tick(_delta: number): void {}
 
-    dispose(): void {}
+    dispose(): void {
+        super.dispose();
+    }
 }
