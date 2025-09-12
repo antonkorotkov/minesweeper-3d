@@ -11,7 +11,7 @@ import MINES_COUNT from "../core/enums/minesCount";
 import MineFieldBlock from "../objects/mine-field-block";
 
 export default class GameScene extends Scene implements IScene {
-    private mainScene: MainScene;
+    protected rayCasterEnabled = true;
     private ambientLight!: AmbientLight;
     private dirLight!: DirectionalLight;
     private mineField!: number[][];
@@ -129,7 +129,9 @@ export default class GameScene extends Scene implements IScene {
         scene.add(axes);
     }
 
-    tick(_delta: number): void {}
+    tick(delta: number): void {
+        super.tick(delta);
+    }
 
     dispose(): void {
         super.dispose();

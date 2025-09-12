@@ -21,11 +21,12 @@ import Singleton from '../core/singleton';
 import IntroScene from './intro.scene';
 import GameScene from './game.scene';
 import type DIFFICULTY from '../core/enums/difficulty';
+import type { IMainScene } from '../core/interfaces/mainScene.interface';
 
 /**
  * Main scene for the game
  */
-export default class MainScene extends Singleton {
+export default class MainScene extends Singleton implements IMainScene {
     public loader!: AssetsLoader;
     public scene!: Scene;
     public pixiScene!: PixiApp;

@@ -1,11 +1,15 @@
 'use strict';
 
-import { Vector2 } from "three";
+import { Raycaster, Vector2 } from "three";
 import type { IScene } from "./interfaces/scene.interface";
 import Singleton from "./singleton";
+import type { IMainScene } from "./interfaces/mainScene.interface";
 
 export default abstract class Scene extends Singleton implements IScene {
+    protected mainScene!: IMainScene;
     protected mouse = new Vector2(0, 0);
+    protected rayCasterEnabled: boolean = false;
+    private rayCaster: Raycaster = new Raycaster();
 
     constructor() {
         super();
@@ -14,7 +18,13 @@ export default abstract class Scene extends Singleton implements IScene {
     }
 
     abstract initDebugHelpers(): void;
-    abstract tick(delta: number): void;
+
+    tick(_delta: number): void {
+        if (this.rayCasterEnabled) {
+            this.rayCaster.setFromCamera(this.mouse, this.mainScene.camera);
+            this.rayCaster.intersectObjects(this.mainScene.scene.children, true);
+        }
+    };
 
     protected init(): void {
         const isDev =

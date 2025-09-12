@@ -30,7 +30,6 @@ import Scene from "../core/scene";
 import DIFFICULTY from "../core/enums/difficulty";
 
 export default class IntroScene extends Scene implements IScene {
-	private mainScene: MainScene;
 	private dirLight!: DirectionalLight;
 	private dirLightHelper!: DirectionalLightHelper;
 	private ambientLight!: AmbientLight;
@@ -240,7 +239,7 @@ export default class IntroScene extends Scene implements IScene {
 	/**
 	 * Update the scene each frame (called from the main animation loop)
 	 */
-	public tick(_delta: number): void {
+	public tick(delta: number): void {
 		this.mine.rotation.y += 0.002;
         this.mine.rotation.x += 0.002;
 		const targetPos = this.getLightTargetPosition();
@@ -249,6 +248,8 @@ export default class IntroScene extends Scene implements IScene {
 		this.dirLight.target.position.set(0, 0, 0);
 
 		if (this.dirLightHelper) this.dirLightHelper.update();
+
+        super.tick(delta);
 	}
 
 	/**
