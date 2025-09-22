@@ -1,5 +1,3 @@
-'use strict';
-
 import DIFFICULTY from "./difficulty";
 
 export const FIELD_SIZE = {

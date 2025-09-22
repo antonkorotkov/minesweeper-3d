@@ -1,5 +1,3 @@
-'use strict';
-
 import type { UnresolvedAsset } from "pixi.js";
 
 type AssetDefinition = { alias: string, src: string };

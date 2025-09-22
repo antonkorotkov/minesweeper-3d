@@ -1,5 +1,3 @@
-'use strict';
-
 export const DEFAULT_PIXEL_RATIO = 2;
 
 export const SCENE_BACKGROUND_COLOR = 0x20232a;

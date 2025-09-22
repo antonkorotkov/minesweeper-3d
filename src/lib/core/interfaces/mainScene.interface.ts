@@ -1,5 +1,3 @@
-'use strict';
-
 import type { Application, Container } from "pixi.js";
 import type { PerspectiveCamera, Scene } from "three";
 import type { OrbitControls } from "three/examples/jsm/Addons.js";

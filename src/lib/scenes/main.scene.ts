@@ -1,5 +1,3 @@
-'use strict';
-
 import { Clock, Color, PCFSoftShadowMap, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import {
     Application as PixiApp,

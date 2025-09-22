@@ -1,5 +1,3 @@
-'use strict';
-
 export interface IScene {
     initDebugHelpers(): void;
     tick(delta: number): void;

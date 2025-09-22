@@ -1,5 +1,3 @@
-'use strict';
-
 import { BoxGeometry } from "three";
 import Singleton from "../../core/singleton";
 

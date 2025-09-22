@@ -1,5 +1,3 @@
-'use strict';
-
 import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js';
 import TWEEN from 'three/addons/libs/tween.module.js';
 

@@ -1,5 +1,3 @@
-'use strict';
-
 import { Group, Mesh } from "three";
 import FieldBlockGeometry from "./geometries/field-block.geometry";
 import FieldBlockMaterial from "./materials/field-block.material";

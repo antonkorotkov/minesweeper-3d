@@ -1,5 +1,3 @@
-'use strict';
-
 import { MeshStandardMaterial } from 'three';
 import Singleton from '../../core/singleton';
 

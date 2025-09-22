@@ -1,7 +1,4 @@
-'use strict';
-
 import { Group, Mesh } from "three";
-
 import MineMaterial from "./materials/mine.material";
 import MineBodyGeometry from "./geometries/mine-body.geometry";
 import MineSpikeGeometry from "./geometries/mine-spike.geometry";

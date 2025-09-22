@@ -1,5 +1,3 @@
-"use strict";
-
 import { LoadingManager, TextureLoader, type Texture as ThreeTexture } from 'three';
 import { Assets as PixiLoader, type Texture as PixiTexture, type UnresolvedAsset } from "pixi.js";
 import { createNanoEvents, type Emitter } from "nanoevents";

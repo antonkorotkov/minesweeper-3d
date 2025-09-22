@@ -1,5 +1,3 @@
-'use strict';
-
 import { SphereGeometry } from "three";
 import Singleton from "../../core/singleton";
 

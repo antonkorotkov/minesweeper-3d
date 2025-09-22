@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * A base singleton class to be extended by other classes.
  */

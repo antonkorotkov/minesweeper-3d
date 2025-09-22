@@ -1,5 +1,3 @@
-'use strict';
-
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 
 type Options = {

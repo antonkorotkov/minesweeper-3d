@@ -1,5 +1,3 @@
-'use strict';
-
 import { Raycaster, Vector2 } from "three";
 import type { IScene } from "./interfaces/scene.interface";
 import Singleton from "./singleton";

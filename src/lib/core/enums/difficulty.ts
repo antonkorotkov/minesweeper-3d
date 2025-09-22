@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Numeric difficulty values. Use `DIFFICULTY.EASY`, `DIFFICULTY.MEDIUM`, `DIFFICULTY.HARD`.
  * Implemented as a const object (no runtime enum syntax) to satisfy

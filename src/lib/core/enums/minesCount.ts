@@ -1,5 +1,3 @@
-'use strict';
-
 import DIFFICULTY from "./difficulty";
 import FIELD_SIZE from "./fieldSize";
 

@@ -1,5 +1,3 @@
-'use strict';
-
 import { CylinderGeometry } from "three";
 import Singleton from "../../core/singleton";
 

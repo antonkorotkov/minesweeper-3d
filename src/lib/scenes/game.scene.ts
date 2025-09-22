@@ -1,5 +1,3 @@
-'use strict';
-
 import { AmbientLight, AxesHelper, DirectionalLight, GridHelper } from "three";
 import type { IScene } from "../core/interfaces/scene.interface";
 import type MainScene from "./main.scene";
