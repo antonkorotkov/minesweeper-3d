@@ -31,6 +31,8 @@ export default class MainScene extends Singleton implements IMainScene {
     public ui!: PixiContainer;
     public camera!: PerspectiveCamera;
     public renderer!: WebGLRenderer;
+
+    // @TODO: Move to the Scene level abstraction
     public controls!: OrbitControls;
     public loadingOverlay!: LoadingOverlay;
     private introScene?: IntroScene;

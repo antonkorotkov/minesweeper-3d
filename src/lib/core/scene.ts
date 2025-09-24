@@ -2,12 +2,18 @@ import { Raycaster, Vector2 } from "three";
 import type { IScene } from "./interfaces/scene.interface";
 import Singleton from "./singleton";
 import type { IMainScene } from "./interfaces/mainScene.interface";
+import type { IInteractiveObject } from "./interfaces/interactiveObject.interface";
 
 export default abstract class Scene extends Singleton implements IScene {
     protected mainScene!: IMainScene;
     protected mouse = new Vector2(0, 0);
     protected rayCasterEnabled: boolean = false;
-    private rayCaster: Raycaster = new Raycaster();
+
+    private rayCaster?: Raycaster;
+    private interactiveObjects: Array<IInteractiveObject> = [];
+    private hoveredObject: IInteractiveObject | null = null;
+
+    abstract initDebugHelpers(): void;
 
     constructor() {
         super();
@@ -15,14 +21,18 @@ export default abstract class Scene extends Singleton implements IScene {
         window.addEventListener("mousemove", this.mouseMoveHandler);
     }
 
-    abstract initDebugHelpers(): void;
+    private getRayCaster(): Raycaster {
+        if (!this.rayCaster)
+            this.rayCaster = new Raycaster();
 
-    tick(_delta: number): void {
-        if (this.rayCasterEnabled) {
-            this.rayCaster.setFromCamera(this.mouse, this.mainScene.camera);
-            this.rayCaster.intersectObjects(this.mainScene.scene.children, true);
-        }
-    };
+        return this.rayCaster;
+    }
+
+    tick(_delta: number): void {};
+
+    protected addInteractiveObject(object: IInteractiveObject): void {
+        this.interactiveObjects.push(object);
+    }
 
     protected init(): void {
         const isDev =
@@ -33,6 +43,30 @@ export default abstract class Scene extends Singleton implements IScene {
     protected mouseMoveHandler = (event: MouseEvent) => {
 		this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 		this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        if (!this.rayCasterEnabled)
+            return;
+
+        const rayCaster = this.getRayCaster();
+        rayCaster.setFromCamera(this.mouse, this.mainScene.camera);
+        const intersects = rayCaster.intersectObjects(this.interactiveObjects);
+
+        if (intersects[0]) {
+            const obj = intersects[0].object.parent as IInteractiveObject;
+
+            if (this.hoveredObject && this.hoveredObject !== obj)
+                this.hoveredObject.onMouseOut();
+
+            if (this.hoveredObject === obj)
+                return;
+
+            this.hoveredObject = obj;
+            obj.onMouseOver();
+        }
+        else if (this.hoveredObject) {
+            this.hoveredObject.onMouseOut();
+            this.hoveredObject = null;
+        }
 	};
 
     dispose(): void {

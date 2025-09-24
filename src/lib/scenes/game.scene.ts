@@ -31,6 +31,9 @@ export default class GameScene extends Scene implements IScene {
         return this.getSingleton<GameScene>(mainScene);
     }
 
+    /**
+     * Generate the minefield based on the selected difficulty level
+     */
     private generateMinefield(difficulty: DIFFICULTY): void {
         const fieldSize = FIELD_SIZE[difficulty];
         const minesCount = MINES_COUNT[difficulty];
@@ -110,6 +113,7 @@ export default class GameScene extends Scene implements IScene {
                 console.log("Adding block at:", r, c, "with value:", value, block);
                 block.setPosition(r * spacing - offset, 0.05, c * spacing - offset);
                 this.mainScene.scene.add(block);
+                this.addInteractiveObject(block);
             }
         }
     }
