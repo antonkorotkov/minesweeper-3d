@@ -19,9 +19,14 @@ export default abstract class Scene extends Singleton implements IScene {
     constructor() {
         super();
 
-        window.addEventListener("mousemove", this.mouseMoveHandler);
+        window.addEventListener('mousemove', this.mouseMoveHandler);
+        window.addEventListener('click', this.mouseClickHandler);
+        window.addEventListener('contextmenu', this.mouseContextMenuHandler);
     }
 
+    /**
+     * Get the singleton instance of the Raycaster
+     */
     private getRayCaster(): Raycaster {
         if (!this.rayCaster)
             this.rayCaster = new Raycaster();
@@ -29,16 +34,23 @@ export default abstract class Scene extends Singleton implements IScene {
         return this.rayCaster;
     }
 
-    tick(_delta: number): void {};
-
+    /**
+     * Add an interactive object to the scene
+     */
     protected addInteractiveObject(object: IInteractiveObject): void {
         this.interactiveObjects.add(object);
     }
 
+    /**
+     * Initialize the scene
+     */
     protected init(): void {
         if (isDev()) this.initDebugHelpers();
     }
 
+    /**
+     * Handle mouse move events
+     */
     protected mouseMoveHandler = (event: MouseEvent) => {
 		this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 		this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -68,7 +80,35 @@ export default abstract class Scene extends Singleton implements IScene {
         }
 	};
 
-    dispose(): void {
-        window.removeEventListener("mousemove", this.mouseMoveHandler);
+    /**
+     * Handle mouse click events
+     */
+    protected mouseClickHandler = () => {
+        if (this.hoveredObject)
+            this.hoveredObject.onClick();
+    };
+
+    /**
+     * Handle right-click (context menu) events
+     */
+    protected mouseContextMenuHandler = (event: MouseEvent) => {
+        event.preventDefault();
+
+        if (this.hoveredObject)
+            this.hoveredObject.onRightClick();
     }
+
+    /**
+     * Dispose of the scene and its resources
+     */
+    dispose(): void {
+        window.removeEventListener('mousemove', this.mouseMoveHandler);
+        window.removeEventListener('click', this.mouseClickHandler);
+        window.removeEventListener('contextmenu', this.mouseContextMenuHandler);
+    }
+
+    /**
+     * Update the scene each frame (called from the main animation loop)
+     */
+    tick(_delta: number): void {};
 }
