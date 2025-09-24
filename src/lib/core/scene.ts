@@ -3,6 +3,7 @@ import type { IScene } from "./interfaces/scene.interface";
 import Singleton from "./singleton";
 import type { IMainScene } from "./interfaces/mainScene.interface";
 import type { IInteractiveObject } from "./interfaces/interactiveObject.interface";
+import { isDev } from "./utils";
 
 export default abstract class Scene extends Singleton implements IScene {
     protected mainScene!: IMainScene;
@@ -10,7 +11,7 @@ export default abstract class Scene extends Singleton implements IScene {
     protected rayCasterEnabled: boolean = false;
 
     private rayCaster?: Raycaster;
-    private interactiveObjects: Array<IInteractiveObject> = [];
+    private interactiveObjects: Set<IInteractiveObject> = new Set();
     private hoveredObject: IInteractiveObject | null = null;
 
     abstract initDebugHelpers(): void;
@@ -31,13 +32,11 @@ export default abstract class Scene extends Singleton implements IScene {
     tick(_delta: number): void {};
 
     protected addInteractiveObject(object: IInteractiveObject): void {
-        this.interactiveObjects.push(object);
+        this.interactiveObjects.add(object);
     }
 
     protected init(): void {
-        const isDev =
-            typeof import.meta !== "undefined" && import.meta.env.DEV === true;
-        if (isDev) this.initDebugHelpers();
+        if (isDev()) this.initDebugHelpers();
     }
 
     protected mouseMoveHandler = (event: MouseEvent) => {
@@ -49,7 +48,7 @@ export default abstract class Scene extends Singleton implements IScene {
 
         const rayCaster = this.getRayCaster();
         rayCaster.setFromCamera(this.mouse, this.mainScene.camera);
-        const intersects = rayCaster.intersectObjects(this.interactiveObjects);
+        const intersects = rayCaster.intersectObjects([...this.interactiveObjects]);
 
         if (intersects[0]) {
             const obj = intersects[0].object.parent as IInteractiveObject;

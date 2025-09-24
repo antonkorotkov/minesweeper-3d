@@ -4,6 +4,7 @@ import {
     Ticker as PixiTicker,
     Container as PixiContainer
 } from 'pixi.js';
+import { Stats } from 'stats.ts';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import TWEEN from 'three/examples/jsm/libs/tween.module.js';
 import AssetsLoader from '../assets/assets.loader';
@@ -20,6 +21,7 @@ import IntroScene from './intro.scene';
 import GameScene from './game.scene';
 import type DIFFICULTY from '../core/enums/difficulty';
 import type { IMainScene } from '../core/interfaces/mainScene.interface';
+import { isDev } from '../core/utils';
 
 /**
  * Main scene for the game
@@ -34,15 +36,23 @@ export default class MainScene extends Singleton implements IMainScene {
 
     // @TODO: Move to the Scene level abstraction
     public controls!: OrbitControls;
+
     public loadingOverlay!: LoadingOverlay;
     private introScene?: IntroScene;
     private gameScene?: GameScene;
+    private stats?: Stats;
 
     /**
      * Constructor for the main scene
      */
 	constructor() {
         super();
+
+        if (isDev()) {
+            this.stats = new Stats();
+            document.body.appendChild(this.stats.dom);
+        }
+
         this.init();
 	}
 
@@ -192,6 +202,8 @@ export default class MainScene extends Singleton implements IMainScene {
         const clock = new Clock();
 
         const animate = () => {
+            this.stats?.begin();
+
             const delta = clock.getDelta();
             this.renderer.render(this.scene, this.camera);
             this.controls.update(delta);
@@ -203,6 +215,8 @@ export default class MainScene extends Singleton implements IMainScene {
 
             if (this.gameScene)
                 this.gameScene.tick(delta);
+
+            this.stats?.end();
 
             window.requestAnimationFrame(animate);
         };
