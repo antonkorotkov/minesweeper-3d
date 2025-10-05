@@ -62,8 +62,9 @@ export default abstract class Scene extends Singleton implements IScene {
         rayCaster.setFromCamera(this.mouse, this.mainScene.camera);
         const intersects = rayCaster.intersectObjects([...this.interactiveObjects]);
 
-        if (intersects[0]) {
-            const obj = intersects[0].object.parent as IInteractiveObject;
+        if (intersects.length > 0) {
+            const obj = this.getDeepestInteractiveObject(intersects[intersects.length - 1].object.parent as IInteractiveObject);
+            if (!obj) return;
 
             if (this.hoveredObject && this.hoveredObject !== obj)
                 this.hoveredObject.onMouseOut();
@@ -79,6 +80,18 @@ export default abstract class Scene extends Singleton implements IScene {
             this.hoveredObject = null;
         }
 	};
+
+    private getDeepestInteractiveObject(object: IInteractiveObject): IInteractiveObject | null {
+        let current: IInteractiveObject | null = object;
+        while (current) {
+            if (this.interactiveObjects.has(current)) {
+                return current;
+            }
+            current = current.parent as IInteractiveObject | null;
+        }
+
+        return null;
+    }
 
     /**
      * Handle mouse click events

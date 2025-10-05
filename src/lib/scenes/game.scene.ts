@@ -88,6 +88,7 @@ export default class GameScene extends Scene implements IScene {
             INTRO_DIRECTIONAL_LIGHT_INTENSITY
         );
         this.dirLight.castShadow = true;
+        this.dirLight.position.set(4, 15, 4);
         this.mainScene.scene.add(this.dirLight);
 
         super.init();
