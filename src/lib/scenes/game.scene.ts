@@ -1,7 +1,7 @@
-import { AmbientLight, AxesHelper, DirectionalLight, GridHelper } from "three";
+import { AmbientLight, AxesHelper, CameraHelper, DirectionalLight, DirectionalLightHelper, GridHelper } from "three";
 import type { IScene } from "../core/interfaces/scene.interface";
 import type MainScene from "./main.scene";
-import { DEBUG_AXES_SIZE, DEBUG_GRID_COLOR1, DEBUG_GRID_COLOR2, DEBUG_GRID_DIVISIONS, DEBUG_GRID_SIZE, INTRO_AMBIENT_LIGHT_COLOR, INTRO_DIRECTIONAL_LIGHT_COLOR, INTRO_DIRECTIONAL_LIGHT_INTENSITY } from "./const";
+import { DEBUG_AXES_SIZE, DEBUG_GRID_COLOR1, DEBUG_GRID_COLOR2, DEBUG_GRID_DIVISIONS, DEBUG_GRID_SIZE, GAME_AMBIENT_LIGHT_COLOR, GAME_DIRECTIONAL_LIGHT_COLOR, GAME_DIRECTIONAL_LIGHT_INTENSITY } from "./const";
 import Scene from "../core/scene";
 import type DIFFICULTY from "../core/enums/difficulty";
 import FIELD_SIZE from "../core/enums/fieldSize";
@@ -13,6 +13,8 @@ export default class GameScene extends Scene implements IScene {
     private ambientLight!: AmbientLight;
     private dirLight!: DirectionalLight;
     private mineField!: number[][];
+    private dirLightHelper!: DirectionalLightHelper;
+    private shadowCamHelper!: CameraHelper;
 
     /**
      * Constructor for the game scene
@@ -80,15 +82,22 @@ export default class GameScene extends Scene implements IScene {
     protected init(): void {
         this.mainScene.controls.enabled = true;
 
-        this.ambientLight = new AmbientLight(INTRO_AMBIENT_LIGHT_COLOR);
+        this.ambientLight = new AmbientLight(GAME_AMBIENT_LIGHT_COLOR);
         this.mainScene.scene.add(this.ambientLight);
 
         this.dirLight = new DirectionalLight(
-            INTRO_DIRECTIONAL_LIGHT_COLOR,
-            INTRO_DIRECTIONAL_LIGHT_INTENSITY
+            GAME_DIRECTIONAL_LIGHT_COLOR,
+            GAME_DIRECTIONAL_LIGHT_INTENSITY
         );
         this.dirLight.castShadow = true;
         this.dirLight.position.set(4, 15, 4);
+        this.dirLight.shadow.camera.far = 25;
+        this.dirLight.shadow.camera.left = -12;
+        this.dirLight.shadow.camera.right = 12;
+        this.dirLight.shadow.camera.top = 12;
+        this.dirLight.shadow.camera.bottom = -12;
+        this.dirLight.shadow.mapSize.width = 2048;
+        this.dirLight.shadow.mapSize.height = 2048;
         this.mainScene.scene.add(this.dirLight);
 
         super.init();
@@ -130,6 +139,12 @@ export default class GameScene extends Scene implements IScene {
         const axes = new AxesHelper(DEBUG_AXES_SIZE);
         axes.position.y = 0.01;
         scene.add(axes);
+
+        this.dirLightHelper = new DirectionalLightHelper(this.dirLight);
+        scene.add(this.dirLightHelper);
+
+        this.shadowCamHelper = new CameraHelper(this.dirLight.shadow.camera);
+        scene.add(this.shadowCamHelper);
     }
 
     tick(delta: number): void {
@@ -138,5 +153,15 @@ export default class GameScene extends Scene implements IScene {
 
     dispose(): void {
         super.dispose();
+
+        if (this.dirLightHelper) {
+			this.mainScene.scene.remove(this.dirLightHelper);
+			this.dirLightHelper.dispose();
+		}
+
+        if (this.shadowCamHelper) {
+            this.mainScene.scene.remove(this.shadowCamHelper);
+            this.shadowCamHelper.dispose();
+        }
     }
 }

@@ -63,7 +63,7 @@ export default abstract class Scene extends Singleton implements IScene {
         const intersects = rayCaster.intersectObjects([...this.interactiveObjects]);
 
         if (intersects.length > 0) {
-            const obj = this.getDeepestInteractiveObject(intersects[intersects.length - 1].object.parent as IInteractiveObject);
+            const obj = this.getDeepestInteractiveObject(intersects[0].object.parent as IInteractiveObject);
             if (!obj) return;
 
             if (this.hoveredObject && this.hoveredObject !== obj)

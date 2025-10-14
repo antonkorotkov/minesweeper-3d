@@ -78,6 +78,8 @@ export default class IntroScene extends Scene implements IScene {
 			INTRO_DIRECTIONAL_LIGHT_INTENSITY
 		);
 		this.dirLight.castShadow = true;
+        this.dirLight.shadow.mapSize.width = 1024;
+        this.dirLight.shadow.mapSize.height = 1024;
 		this.mainScene.scene.add(this.dirLight);
 
 		const lightTarget = new Object3D();

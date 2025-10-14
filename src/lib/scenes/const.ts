@@ -8,7 +8,11 @@ export const CAMERA_FAR = 150;
 
 export const INTRO_AMBIENT_LIGHT_COLOR = 0xffffff;
 export const INTRO_DIRECTIONAL_LIGHT_COLOR = 0xffffff;
-export const INTRO_DIRECTIONAL_LIGHT_INTENSITY = 8;
+export const INTRO_DIRECTIONAL_LIGHT_INTENSITY = 50;
+
+export const GAME_AMBIENT_LIGHT_COLOR = 0xffffff;
+export const GAME_DIRECTIONAL_LIGHT_COLOR = 0xadd8e6;
+export const GAME_DIRECTIONAL_LIGHT_INTENSITY = 8;
 
 export const CONTROLS_ENABLE_DAMPING = true;
 export const CONTROLS_DAMPING_FACTOR = 0.1;
