@@ -1,20 +1,20 @@
-import { MeshStandardMaterial } from 'three';
+import { MeshPhongMaterial } from 'three';
 import Singleton from '../../core/singleton';
 
 export default class MineMaterial extends Singleton {
-    #material: MeshStandardMaterial;
+    #material: MeshPhongMaterial;
 
     constructor() {
         super();
 
-        this.#material = new MeshStandardMaterial({ color: 0x111111, metalness: 0.95, roughness: 0.5 });
+        this.#material = new MeshPhongMaterial({ color: 0x050505, shininess: 100 });
     }
 
     static getInstance(): MineMaterial {
         return this.getSingleton<MineMaterial>();
     }
 
-    get material(): MeshStandardMaterial {
+    get material(): MeshPhongMaterial {
         return this.#material;
     }
 }

@@ -13,15 +13,24 @@ export default abstract class Scene extends Singleton implements IScene {
     private rayCaster?: Raycaster;
     private interactiveObjects: Set<IInteractiveObject> = new Set();
     private hoveredObject: IInteractiveObject | null = null;
+    private mouseMoving: boolean = false;
 
     abstract initDebugHelpers(): void;
 
     constructor() {
         super();
 
+        window.addEventListener('mousedown', this.mouseDownHandler);
         window.addEventListener('mousemove', this.mouseMoveHandler);
         window.addEventListener('click', this.mouseClickHandler);
         window.addEventListener('contextmenu', this.mouseContextMenuHandler);
+    }
+
+    /**
+     * Handle mouse down events
+     */
+    private mouseDownHandler = () => {
+        this.mouseMoving = false;
     }
 
     /**
@@ -54,6 +63,7 @@ export default abstract class Scene extends Singleton implements IScene {
     protected mouseMoveHandler = (event: MouseEvent) => {
 		this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 		this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        this.mouseMoving = true;
 
         if (!this.rayCasterEnabled)
             return;
@@ -97,7 +107,7 @@ export default abstract class Scene extends Singleton implements IScene {
      * Handle mouse click events
      */
     protected mouseClickHandler = () => {
-        if (this.hoveredObject)
+        if (this.hoveredObject && !this.mouseMoving)
             this.hoveredObject.onClick();
     };
 
@@ -115,6 +125,7 @@ export default abstract class Scene extends Singleton implements IScene {
      * Dispose of the scene and its resources
      */
     dispose(): void {
+        window.removeEventListener('mousedown', this.mouseDownHandler);
         window.removeEventListener('mousemove', this.mouseMoveHandler);
         window.removeEventListener('click', this.mouseClickHandler);
         window.removeEventListener('contextmenu', this.mouseContextMenuHandler);

@@ -15,6 +15,7 @@ export default class GameScene extends Scene implements IScene {
     private mineField!: number[][];
     private dirLightHelper!: DirectionalLightHelper;
     private shadowCamHelper!: CameraHelper;
+    private neighborBlocks: MineFieldBlock[][] = [];
 
     /**
      * Constructor for the game scene
@@ -75,8 +76,6 @@ export default class GameScene extends Scene implements IScene {
                 this.mineField[r][c] = mineCount;
             }
         }
-
-        console.log("Generated Minefield:", this.mineField);
     }
 
     protected init(): void {
@@ -104,8 +103,6 @@ export default class GameScene extends Scene implements IScene {
     }
 
     start(difficulty: DIFFICULTY): void {
-        console.log("Starting game with difficulty:", difficulty);
-
         this.generateMinefield(difficulty);
         this.drawField();
     }
@@ -119,8 +116,9 @@ export default class GameScene extends Scene implements IScene {
             for (let c = 0; c < size; c++) {
                 const value = this.mineField[r][c];
 
-                const block = new MineFieldBlock(r, c);
-                console.log("Adding block at:", r, c, "with value:", value, block);
+                const block = new MineFieldBlock(r, c, value, this.neighborBlocks);
+                this.neighborBlocks[r] = this.neighborBlocks[r] || [];
+                this.neighborBlocks[r][c] = block;
                 block.setPosition(r * spacing - offset, 0.05, c * spacing - offset);
                 this.mainScene.scene.add(block);
                 this.addInteractiveObject(block);
