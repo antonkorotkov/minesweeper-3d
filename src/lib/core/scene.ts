@@ -134,5 +134,9 @@ export default abstract class Scene extends Singleton implements IScene {
     /**
      * Update the scene each frame (called from the main animation loop)
      */
-    tick(_delta: number): void {};
+    tick(_delta: number): void {
+        this.interactiveObjects.forEach((obj) => {
+            obj.tick(_delta);
+        });
+    };
 }

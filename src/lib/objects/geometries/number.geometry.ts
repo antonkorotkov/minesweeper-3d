@@ -9,7 +9,7 @@ const font = fontLoader.parse(f);
 const textGeometryParams: TextGeometryParameters = {
     font,
     size: 0.5,
-    depth: 0.2,
+    depth: 0.1,
     curveSegments: 6,
     bevelEnabled: true,
     bevelThickness: 0.03,
@@ -57,13 +57,15 @@ class NumberGeometry {
     }
 
     getMaterial(number: number): MeshBasicMaterial {
-        const colorHex = numberColors[number] || 0x000000;
+        const colorHex = numberColors[number] ?? 0x000000;
         return new MeshBasicMaterial({ color: new Color(colorHex) });
     }
 
     createNumberMesh(number: number): Mesh | undefined {
         const geometry = this.getGeometry(number);
-        if (!geometry) return undefined;
+        if (!geometry)
+            return undefined;
+
         const material = this.getMaterial(number);
         return new Mesh(geometry, material);
     }

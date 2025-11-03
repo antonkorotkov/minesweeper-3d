@@ -1,12 +1,16 @@
-import { Group, Mesh, Material } from "three";
+import { Group, Mesh, Material, Vector3, Quaternion } from "three";
 import FieldBlockGeometry from "./geometries/field-block.geometry";
 import FieldBlockMaterial from "./materials/field-block.material";
 import type { IInteractiveObject } from "../core/interfaces/interactiveObject.interface";
-import TWEEN from 'three/examples/jsm/libs/tween.module.js';
+import TWEEN, { type Tween } from 'three/examples/jsm/libs/tween.module.js';
 import Flag from "./flag";
 import MineMaterial from "./materials/mine.material";
 import NumberGeometry from "./geometries/number.geometry";
+import MainScene from "../scenes/main.scene";
 
+/**
+ * Class representing a single block in the minefield
+ */
 export default class MineFieldBlock extends Group implements IInteractiveObject {
     x!: number;
     y!: number;
@@ -22,6 +26,9 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
     private materialHighlight!: Material;
     private flagMesh!: Group;
     private neighborBlocks: MineFieldBlock[][] = [];
+    private lastCameraPosition = new Vector3();
+    private rotationTween?: Tween<any>;
+    private rotationDelay = 300;
 
     constructor(x: number, y: number, value: number, neighborBlocks: MineFieldBlock[][]) {
         super();
@@ -34,6 +41,9 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
         this.create();
     }
 
+    /**
+     * Handle mouse click event
+     */
     onClick(): void {
         if (this.isRevealed || this.isFlagged)
             return;
@@ -51,6 +61,9 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
         }
     }
 
+    /**
+     * Reveal adjacent blocks if they are not revealed yet
+     */
     private revealAdjacentBlocks(): void {
         const directions = [
             { x: -1, y: -1 },
@@ -71,6 +84,9 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
         }
     }
 
+    /**
+     * Get neighbor block at specified coordinates
+     */
     private getNeighbor(x: number, y: number): MineFieldBlock | null {
         if (x < 0 || y < 0 || x >= this.neighborBlocks.length || y >= this.neighborBlocks[x].length)
             return null;
@@ -78,10 +94,16 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
         return this.neighborBlocks[x][y];
     }
 
+    /**
+     * Handle mouse right-click event
+     */
     onRightClick(): void {
         this.toggleFlag();
     }
 
+    /**
+     * Handle mouse over event
+     */
     onMouseOver(): void {
         if (!this.isRevealed) {
             window.document.body.style.cursor = 'pointer';
@@ -89,6 +111,9 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
         }
     }
 
+    /**
+     * Handle mouse out event
+     */
     onMouseOut(): void {
         if (!this.isRevealed) {
             window.document.body.style.cursor = 'auto';
@@ -96,6 +121,9 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
         }
     }
 
+    /**
+     * Toggle the flagged state of the block
+     */
     private toggleFlag(): void {
         this.isFlagged = !this.isFlagged;
         if (this.isFlagged) {
@@ -117,6 +145,9 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
         }
     }
 
+    /**
+     * Reveal the block visually
+     */
     private reveal(): void {
         this.isRevealed = true;
         new TWEEN.Tween(this.mesh.scale)
@@ -132,17 +163,23 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
         this.mesh.material = this.materialHighlight;
     }
 
+    /**
+     * Toggle the visibility of the number mesh
+     */
     private toggleNumber(): void {
         if (!this.number) return;
 
         this.number.visible = true;
-        this.number.scale.set(0, 0, 0);
+        this.number.lookAt(MainScene.init().camera.position);
         new TWEEN.Tween(this.number.scale)
             .to({ x: 1, y: 1, z: 1 }, 500)
             .easing(TWEEN.Easing.Elastic.Out)
             .start();
     }
 
+    /**
+     * Create the minefield block components
+     */
     private create(): void {
         const geometry = FieldBlockGeometry.getInstance().geometry;
         this.materialNormal = FieldBlockMaterial.getInstance().materialNormal;
@@ -159,13 +196,76 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
 
         this.number = NumberGeometry.getInstance().createNumberMesh(this.value);
         if (this.number) {
-            this.number.position.set(0, 0.5, 0);
+            this.number.scale.set(0, 0, 0);
+            this.number.position.set(0, 0.3, 0);
             this.number.visible = false;
             this.add(this.number);
         }
     }
 
+    /**
+     * Set the position of the block
+     */
     public setPosition(x: number, y: number, z: number): void {
         this.position.set(x, y, z);
+    }
+
+    /**
+     * Update the object's state
+     */
+    public tick(): void {
+        const mainScene = MainScene.init();
+
+        if (this.number && this.number.visible) {
+            const cameraPosition = mainScene.camera.position;
+            const distanceMoved = this.lastCameraPosition.distanceTo(cameraPosition);
+
+            if (distanceMoved > 0.01) {
+                this.lastCameraPosition.copy(cameraPosition);
+                this.startDelayedRotation();
+            }
+        }
+    }
+
+    /**
+     * Start delayed smooth rotation to face camera
+     */
+    private startDelayedRotation(): void {
+        if (!this.number)
+            return;
+
+        if (this.rotationTween)
+            this.rotationTween.stop();
+
+        setTimeout(() => {
+            this.animateToFaceCamera();
+        }, this.rotationDelay);
+    }
+
+    /**
+     * Smoothly animate number to face camera
+     */
+    private animateToFaceCamera(): void {
+        if (!this.number) return;
+
+        const mainScene = MainScene.init();
+        const startQuat = new Quaternion().copy(this.number.quaternion);
+        const tempVector = new Vector3();
+        tempVector.copy(mainScene.camera.position);
+        this.number.lookAt(tempVector);
+
+        const targetQuat = new Quaternion().copy(this.number.quaternion);
+        this.number.quaternion.copy(startQuat);
+
+        const progress = { value: 0 };
+        this.rotationTween = new TWEEN.Tween(progress)
+            .to({ value: 1 }, 400) // 400ms smooth rotation
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .onUpdate(() => {
+                if (this.number) {
+                    this.number.quaternion.slerpQuaternions(startQuat, targetQuat, progress.value);
+                }
+            })
+            .start();
     }
 }

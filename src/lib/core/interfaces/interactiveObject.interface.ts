@@ -5,4 +5,5 @@ export interface IInteractiveObject extends Group {
     onRightClick(): void;
     onMouseOver(): void;
     onMouseOut(): void;
+    tick(d: number): void;
 };
