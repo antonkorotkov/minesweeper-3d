@@ -107,6 +107,55 @@ export default class GameScene extends Scene implements IScene {
         this.drawField();
     }
 
+    /**
+     * Check if the player has won the game
+     */
+    private checkWinCondition = (): void => {
+        const fieldSize = this.neighborBlocks.length;
+        let revealedNonMineBlocks = 0;
+        let totalNonMineBlocks = 0;
+
+        // Count all non-mine blocks and revealed non-mine blocks
+        for (let r = 0; r < fieldSize; r++) {
+            for (let c = 0; c < fieldSize; c++) {
+                const block = this.neighborBlocks[r][c];
+                if (!block.hasMine) {
+                    totalNonMineBlocks++;
+                    if (block.isRevealed) {
+                        revealedNonMineBlocks++;
+                    }
+                }
+            }
+        }
+
+        // Player wins if all non-mine blocks are revealed
+        if (revealedNonMineBlocks === totalNonMineBlocks)
+            this.onGameWon();
+    }
+
+    /**
+     * Handle game won condition
+     */
+    private onGameWon(): void {
+        console.log('🎉 Congratulations! You won the game!');
+
+        // Reveal all remaining mines with a celebration effect
+        const fieldSize = this.neighborBlocks.length;
+        let delay = 0;
+
+        for (let r = 0; r < fieldSize; r++) {
+            for (let c = 0; c < fieldSize; c++) {
+                const block = this.neighborBlocks[r][c];
+                if (block.hasMine && !block.isRevealed) {
+                    setTimeout(() => {
+                        block.celebrateMine();
+                    }, delay);
+                    delay += 100; // Stagger the mine reveals
+                }
+            }
+        }
+    }
+
     private drawField(): void {
         const size = this.mineField.length;
         const spacing = 1.01;
@@ -116,7 +165,7 @@ export default class GameScene extends Scene implements IScene {
             for (let c = 0; c < size; c++) {
                 const value = this.mineField[r][c];
 
-                const block = new MineFieldBlock(r, c, value, this.neighborBlocks);
+                const block = new MineFieldBlock(r, c, value, this.neighborBlocks, this.checkWinCondition);
                 this.neighborBlocks[r] = this.neighborBlocks[r] || [];
                 this.neighborBlocks[r][c] = block;
                 block.setPosition(r * spacing - offset, 0.05, c * spacing - offset);

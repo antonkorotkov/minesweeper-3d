@@ -79,7 +79,6 @@ export default class MainScene extends Singleton implements IMainScene {
         this.loader = AssetsLoader.getInstance();
 
         this.loader.on('progress', (progress) => {
-            console.log(`Loading progress: ${progress}%`);
             this.loadingOverlay.setProgress(progress);
         });
 

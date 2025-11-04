@@ -13,6 +13,7 @@ export default class IntroMine extends Group {
         const material = MineMaterial.getInstance().material;
         const bodyGeometry = MineBodyGeometry.getInstance().geometry;
         const mineBody = new Mesh(bodyGeometry, material);
+        mineBody.castShadow = true;
         mineBody.receiveShadow = true;
 
         const spikeCountLat = 4;

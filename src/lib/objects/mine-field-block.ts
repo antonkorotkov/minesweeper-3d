@@ -4,9 +4,9 @@ import FieldBlockMaterial from "./materials/field-block.material";
 import type { IInteractiveObject } from "../core/interfaces/interactiveObject.interface";
 import TWEEN, { type Tween } from 'three/examples/jsm/libs/tween.module.js';
 import Flag from "./flag";
-import MineMaterial from "./materials/mine.material";
 import NumberGeometry from "./geometries/number.geometry";
 import MainScene from "../scenes/main.scene";
+import IntroMine from "./intro-mine";
 
 /**
  * Class representing a single block in the minefield
@@ -22,6 +22,7 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
 
     private mesh!: Mesh;
     private number?: Mesh;
+    private mine?: IntroMine;
     private materialNormal!: Material;
     private materialHighlight!: Material;
     private flagMesh!: Group;
@@ -29,14 +30,16 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
     private lastCameraPosition = new Vector3();
     private rotationTween?: Tween<any>;
     private rotationDelay = 300;
+    private onReveal: () => void;
 
-    constructor(x: number, y: number, value: number, neighborBlocks: MineFieldBlock[][]) {
+    constructor(x: number, y: number, value: number, neighborBlocks: MineFieldBlock[][], onReveal: () => void) {
         super();
         this.x = x;
         this.y = y;
         this.hasMine = value === -1;
         this.value = value;
         this.neighborBlocks = neighborBlocks;
+        this.onReveal = onReveal;
 
         this.create();
     }
@@ -49,8 +52,7 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
             return;
 
         if (this.hasMine) {
-            // Show mine
-            this.mesh.material = MineMaterial.getInstance().material;
+            // game over
         } else {
             this.reveal();
 
@@ -161,6 +163,7 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
             .start();
 
         this.mesh.material = this.materialHighlight;
+        this.onReveal();
     }
 
     /**
@@ -200,6 +203,13 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
             this.number.position.set(0, 0.3, 0);
             this.number.visible = false;
             this.add(this.number);
+        }
+
+        if (this.hasMine) {
+            this.mine = new IntroMine();
+            this.mine.position.set(0, 0, 0);
+            this.mine.scale.set(0, 0, 0);
+            this.add(this.mine);
         }
     }
 
@@ -259,13 +269,30 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
 
         const progress = { value: 0 };
         this.rotationTween = new TWEEN.Tween(progress)
-            .to({ value: 1 }, 400) // 400ms smooth rotation
+            .to({ value: 1 }, 400)
             .easing(TWEEN.Easing.Quadratic.Out)
             .onUpdate(() => {
                 if (this.number) {
                     this.number.quaternion.slerpQuaternions(startQuat, targetQuat, progress.value);
                 }
             })
+            .start();
+    }
+
+    /**
+     * Show mine with celebration effect when game is won
+     */
+    celebrateMine(): void {
+        if (!this.mine) return;
+
+        new TWEEN.Tween(this.mine.scale)
+            .to({ x: 0.12, y: 0.12, z: 0.12 }, 300)
+            .easing(TWEEN.Easing.Elastic.Out)
+            .start();
+
+        new TWEEN.Tween(this.mine.position)
+            .to({ y: 0.5 }, 300)
+            .easing(TWEEN.Easing.Elastic.Out)
             .start();
     }
 }
