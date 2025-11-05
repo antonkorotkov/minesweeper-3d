@@ -16,6 +16,7 @@ export default class GameScene extends Scene implements IScene {
     private dirLightHelper!: DirectionalLightHelper;
     private shadowCamHelper!: CameraHelper;
     private neighborBlocks: MineFieldBlock[][] = [];
+    private gameOver = false;
 
     /**
      * Constructor for the game scene
@@ -111,11 +112,13 @@ export default class GameScene extends Scene implements IScene {
      * Check if the player has won the game
      */
     private checkWinCondition = (): void => {
+        if (this.gameOver)
+            return;
+
         const fieldSize = this.neighborBlocks.length;
         let revealedNonMineBlocks = 0;
         let totalNonMineBlocks = 0;
 
-        // Count all non-mine blocks and revealed non-mine blocks
         for (let r = 0; r < fieldSize; r++) {
             for (let c = 0; c < fieldSize; c++) {
                 const block = this.neighborBlocks[r][c];
@@ -128,32 +131,72 @@ export default class GameScene extends Scene implements IScene {
             }
         }
 
-        // Player wins if all non-mine blocks are revealed
-        if (revealedNonMineBlocks === totalNonMineBlocks)
-            this.onGameWon();
+        if (revealedNonMineBlocks === totalNonMineBlocks) {
+            this.onGameWon().then(() => {
+                setTimeout(() => {
+                    if (confirm("Congratulations! You've won! Start a new game?"))
+                        window.location.reload();
+                }, 500);
+            });
+        }
     }
 
     /**
      * Handle game won condition
      */
-    private onGameWon(): void {
-        console.log('🎉 Congratulations! You won the game!');
-
-        // Reveal all remaining mines with a celebration effect
+    private async onGameWon(): Promise<void> {
         const fieldSize = this.neighborBlocks.length;
-        let delay = 0;
 
         for (let r = 0; r < fieldSize; r++) {
             for (let c = 0; c < fieldSize; c++) {
                 const block = this.neighborBlocks[r][c];
                 if (block.hasMine && !block.isRevealed) {
-                    setTimeout(() => {
-                        block.celebrateMine();
-                    }, delay);
-                    delay += 100; // Stagger the mine reveals
+                    await new Promise<void>(resolve => {
+                        setTimeout(() => {
+                            block.revealMine();
+                            resolve();
+                        }, 100);
+                    });
                 }
             }
         }
+    }
+
+    /**
+     * Handle game over condition when mine is clicked
+     */
+    private onMineClick = async (explodedBlock: MineFieldBlock): Promise<void> => {
+        if (this.gameOver)
+            return;
+
+        this.gameOver = true;
+
+        const fieldSize = this.neighborBlocks.length;
+        for (let r = 0; r < fieldSize; r++) {
+            for (let c = 0; c < fieldSize; c++) {
+                const block = this.neighborBlocks[r][c];
+                if (block !== explodedBlock) {
+                    await new Promise<void>(resolve => {
+                        if (block.isRevealed)
+                            return resolve();
+
+                        setTimeout(() => {
+                            block.reveal();
+                            if (block.hasMine)
+                                block.revealMine();
+                            else
+                                block.toggleNumber();
+                            resolve();
+                        }, 100);
+                    });
+                }
+            }
+        }
+
+        setTimeout(() => {
+            if (confirm("Game Over! You've hit a mine. Start a new game?"))
+                window.location.reload();
+        }, 500);
     }
 
     private drawField(): void {
@@ -165,7 +208,7 @@ export default class GameScene extends Scene implements IScene {
             for (let c = 0; c < size; c++) {
                 const value = this.mineField[r][c];
 
-                const block = new MineFieldBlock(r, c, value, this.neighborBlocks, this.checkWinCondition);
+                const block = new MineFieldBlock(r, c, value, this.neighborBlocks, this.checkWinCondition, this.onMineClick);
                 this.neighborBlocks[r] = this.neighborBlocks[r] || [];
                 this.neighborBlocks[r][c] = block;
                 block.setPosition(r * spacing - offset, 0.05, c * spacing - offset);

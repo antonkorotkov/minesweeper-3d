@@ -8,12 +8,12 @@ const font = fontLoader.parse(f);
 
 const textGeometryParams: TextGeometryParameters = {
     font,
-    size: 0.5,
-    depth: 0.1,
+    size: 0.4,
+    depth: 0.09,
     curveSegments: 6,
     bevelEnabled: true,
-    bevelThickness: 0.03,
-    bevelSize: 0.02,
+    bevelThickness: 0.02,
+    bevelSize: 0.01,
     bevelOffset: 0,
     bevelSegments: 5
 };

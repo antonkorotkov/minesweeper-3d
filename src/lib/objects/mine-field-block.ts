@@ -1,4 +1,4 @@
-import { Group, Mesh, Material, Vector3, Quaternion } from "three";
+import { Group, Mesh, Material, Vector3, Quaternion, SphereGeometry, MeshBasicMaterial, Color } from "three";
 import FieldBlockGeometry from "./geometries/field-block.geometry";
 import FieldBlockMaterial from "./materials/field-block.material";
 import type { IInteractiveObject } from "../core/interfaces/interactiveObject.interface";
@@ -21,7 +21,7 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
     hasMine: boolean = false;
 
     private mesh!: Mesh;
-    private number?: Mesh;
+    public number?: Mesh;
     private mine?: IntroMine;
     private materialNormal!: Material;
     private materialHighlight!: Material;
@@ -31,8 +31,16 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
     private rotationTween?: Tween<any>;
     private rotationDelay = 300;
     private onReveal: () => void;
+    private onMineClick: (block: MineFieldBlock) => void;
 
-    constructor(x: number, y: number, value: number, neighborBlocks: MineFieldBlock[][], onReveal: () => void) {
+    constructor(
+        x: number, 
+        y: number, 
+        value: number, 
+        neighborBlocks: MineFieldBlock[][], 
+        onReveal: () => void,
+        onMineClick: (block: MineFieldBlock) => void
+    ) {
         super();
         this.x = x;
         this.y = y;
@@ -40,6 +48,7 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
         this.value = value;
         this.neighborBlocks = neighborBlocks;
         this.onReveal = onReveal;
+        this.onMineClick = onMineClick;
 
         this.create();
     }
@@ -52,7 +61,8 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
             return;
 
         if (this.hasMine) {
-            // game over
+            this.explodeMine();
+            this.onMineClick(this);
         } else {
             this.reveal();
 
@@ -150,7 +160,7 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
     /**
      * Reveal the block visually
      */
-    private reveal(): void {
+    public reveal(): void {
         this.isRevealed = true;
         new TWEEN.Tween(this.mesh.scale)
             .to({ y: 0.5 }, 500)
@@ -169,7 +179,10 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
     /**
      * Toggle the visibility of the number mesh
      */
-    private toggleNumber(): void {
+    public toggleNumber(): void {
+        if (this.isFlagged)
+            this.toggleFlag();
+
         if (!this.number) return;
 
         this.number.visible = true;
@@ -282,8 +295,12 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
     /**
      * Show mine with celebration effect when game is won
      */
-    celebrateMine(): void {
+    revealMine(): void {
         if (!this.mine) return;
+        this.isRevealed = true;
+
+        if (this.isFlagged)
+            this.toggleFlag();
 
         new TWEEN.Tween(this.mine.scale)
             .to({ x: 0.12, y: 0.12, z: 0.12 }, 300)
@@ -294,5 +311,87 @@ export default class MineFieldBlock extends Group implements IInteractiveObject 
             .to({ y: 0.5 }, 300)
             .easing(TWEEN.Easing.Elastic.Out)
             .start();
+    }
+
+    /**
+     * Create explosion effect when mine is clicked
+     */
+    private explodeMine(): void {
+        this.revealMine();
+        this.createExplosionParticles();
+        this.createShakeEffect();
+    }
+
+    /**
+     * Create simple particle explosion effect
+     */
+    private createExplosionParticles(): void {
+        const particleCount = 256;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particleGeometry = new SphereGeometry(0.05, 8, 8);
+            const particleMaterial = new MeshBasicMaterial({
+                color: new Color().setHSL(Math.random() * 0.1, 0.9, 0.6)
+            });
+            const particle = new Mesh(particleGeometry, particleMaterial);
+            particle.position.y += 0.1;
+
+            const direction = new Vector3(
+                (Math.random() - 0.5) * 2,
+                Math.random() * 1.5 + 0.5,
+                (Math.random() - 0.5) * 2
+            ).normalize();
+
+            const speed = Math.random() * 2 + 1;
+            const velocity = direction.multiplyScalar(speed);
+
+            this.add(particle);
+
+            new TWEEN.Tween(particle.position)
+                .to({
+                    x: particle.position.x + velocity.x,
+                    y: particle.position.y + velocity.y,
+                    z: particle.position.z + velocity.z
+                }, 1000)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+
+            new TWEEN.Tween(particle.scale)
+                .to({ x: 0, y: 0, z: 0 }, 1000)
+                .easing(TWEEN.Easing.Quadratic.In)
+                .onComplete(() => {
+                    this.remove(particle);
+                    particleGeometry.dispose();
+                    particleMaterial.dispose();
+                })
+                .start();
+        }
+    }
+
+    /**
+     * Create shake and flash effect for explosion
+     */
+    private createShakeEffect(): void {
+        const originalPosition = this.position.clone();
+        const shakeIntensity = 0.1;
+
+        const flashMaterial = new MeshBasicMaterial({ color: 0xff0000 });
+        this.mesh.material = flashMaterial;
+
+        const shake = () => {
+            this.position.set(
+                originalPosition.x + (Math.random() - 0.5) * shakeIntensity,
+                originalPosition.y + (Math.random() - 0.5) * shakeIntensity,
+                originalPosition.z + (Math.random() - 0.5) * shakeIntensity
+            );
+        };
+
+        const shakeInterval = setInterval(shake, 50);
+
+        setTimeout(() => {
+            clearInterval(shakeInterval);
+            this.position.copy(originalPosition);
+            this.mesh.material = this.materialHighlight;
+        }, 500);
     }
 }
