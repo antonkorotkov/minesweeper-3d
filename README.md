@@ -19,7 +19,7 @@ A modern, interactive 3D implementation of the classic Minesweeper game built wi
 
 ## 📸 Screenshots
 
-_Add screenshots of your game here_
+![2025-11-05_10-23-51](https://github.com/user-attachments/assets/2193ccc0-f256-4bf3-82fc-4a84b3531295)
 
 ## 🚀 Getting Started
 
