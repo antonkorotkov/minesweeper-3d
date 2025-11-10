@@ -67,7 +67,9 @@ class NumberGeometry {
             return undefined;
 
         const material = this.getMaterial(number);
-        return new Mesh(geometry, material);
+        const mesh = new Mesh(geometry, material);
+        mesh.castShadow = true;
+        return mesh;
     }
 }
 
